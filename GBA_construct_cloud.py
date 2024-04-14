@@ -26,5 +26,35 @@ def rgb_depth_to_point_clouds(rgb_img, depth_img, json_file):
     pcd.transform([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]])
     return pcd
 
+def pixel_to_world(camera_params, pixel_x, pixel_y, depth_value):
+    fx = camera_params["fx"]
+    fy = camera_params["fy"]
+    px = camera_params["px"]
+    py = camera_params["py"]
+    x = (pixel_x - px) * depth_value / fx
+    y = (pixel_y - py) * depth_value / fy
+    z = depth_value
+    return np.array([x, y, z])
 
+def depth_pixels_2_world_coords(json_file, depth_pixels):
+    # depth_pixels: list[x,y,d]
+    # rtype: list of lists of coords, [[x, y, z]]
+    world_coords = []
+    for depth_pixel in depth_pixels:
+        world_coord = pixel_to_world(json_file, depth_pixel[0], depth_pixel[1], depth_pixel[2])
+        world_coords.append(world_coord)
+    return world_coords
+def Test():
+    depth_img = cv2.imread('./data/place_quality_inputs/0/depth.png', cv2.IMREAD_UNCHANGED)
+    with open('./data/place_quality_inputs/0/cam.json', 'r') as f:
+        json_file = json.load(f)
+    depth_pixels = []
+    for x in range(281, 599):
+        for y in range(260, 342):
+            depth_pixels.append([x, y, depth_img[y][x]])
+    surface_world_coord = depth_pixels_2_world_coords(json_file, depth_pixels)
+    print(len(surface_world_coord))
+    # print(surface_world_coord)
+    return
+Test()
 
