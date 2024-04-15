@@ -70,3 +70,17 @@ def Regression4pts(_4pts, depth_img, json_file):
     # print("down arrow", down_arrow)
     # print("center", center)
     return [right_arrow, down_arrow, center]
+
+def PoseEst(vec1, vec2, center):
+    # rtype:
+    # Gram-Schmidt process to orthogonalize and normalize the vectors
+    v1 = vec1 / np.linalg.norm(vec1)
+    v2 = vec2 - np.dot(vec2, v1) * v1
+    v2 = v2 / np.linalg.norm(v2)
+    # Calculate the cross product to find the third orthogonal vector
+    v3 = np.cross(v1, v2)
+    # Construct the rotation matrix
+    rotation_matrix = np.column_stack((v1, v2, v3))
+    print("rotation & translation mat")
+    print(rotation_matrix, center)
+    return rotation_matrix, center
