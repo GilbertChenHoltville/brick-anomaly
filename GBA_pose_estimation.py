@@ -1,4 +1,5 @@
 import numpy as np
+import GBA_construct_cloud
 
 def fit_plane(points):
     # Convert the list of points to a numpy array
@@ -23,3 +24,41 @@ def correct_depth(plane_params, x, y, z):
     res = (-plane_params[0] * x - plane_params[1] * y - plane_params[3]) / plane_params[2]
     return res
 
+def Regression4pts(_4pts, depth_img, json_file):
+    # rtype: List[(x,y,z)], order LT RT RB LB
+    #next version: sliding for anchor points
+    [LT_asn, RT_asn, RB_asn, LB_asn] = _4pts # assigned 4 anchor points
+    [b_LT_ori_pix_exist, b_RT_ori_pix_exist, b_RB_ori_pix_exist, b_LB_ori_pix_exist] = [False, False, False, False]
+    if depth_img[LT_asn[1]][LT_asn[0]] != 0:
+        b_LT_ori_pix_exist = True
+        LT_world_coord = GBA_construct_cloud.pixel_to_world(json_file, LT_asn[0], LT_asn[1], depth_img[LT_asn[1]][LT_asn[0]])
+        # print("LT", LT_world_coord)
+    if depth_img[RT_asn[1]][RT_asn[0]] != 0:
+        b_RT_ori_pix_exist = True
+        RT_world_coord = GBA_construct_cloud.pixel_to_world(json_file, RT_asn[0], RT_asn[1], depth_img[RT_asn[1]][RT_asn[0]])
+        # print("RT", RT_world_coord)
+    if depth_img[RB_asn[1]][RB_asn[0]] != 0:
+        b_RB_ori_pix_exist = True
+        RB_world_coord = GBA_construct_cloud.pixel_to_world(json_file, RB_asn[0], RB_asn[1], depth_img[RB_asn[1]][RB_asn[0]])
+        # print("RB", RB_world_coord)
+    if depth_img[LB_asn[1]][LB_asn[0]] != 0:
+        b_LB_ori_pix_exist = True
+        LB_world_coord = GBA_construct_cloud.pixel_to_world(json_file, LB_asn[0], LB_asn[1], depth_img[LB_asn[1]][LB_asn[0]])
+        # print("LB", LB_world_coord)
+    if b_LT_ori_pix_exist and b_RT_ori_pix_exist:
+        right_arrow = RT_world_coord - LT_world_coord
+    elif b_LB_ori_pix_exist and b_RB_ori_pix_exist:
+        right_arrow = RB_world_coord - LB_world_coord
+    else:
+        print("regression version 1 failed")
+        return None
+    if b_LT_ori_pix_exist and b_LB_ori_pix_exist:
+        up_arrow = LT_world_coord - LB_world_coord
+    elif b_RT_ori_pix_exist and b_RB_ori_pix_exist:
+        up_arrow = RT_world_coord - RB_world_coord
+    else:
+        print("regression version 1 failed")
+        return None
+    # print("right_arrow", right_arrow)
+    # print("up arrow", up_arrow)
+    return [right_arrow, up_arrow]
