@@ -35,4 +35,5 @@ if __name__ == '__main__':
                 ], 
             depth_img, cam_json_file
             )
+        print("brick", str(brick_id), "rotation & translation mat")
         GBA_pose_estimation.PoseEst(right_arrow, down_arrow, surface_center)

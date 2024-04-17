@@ -81,6 +81,5 @@ def PoseEst(vec1, vec2, center):
     v3 = np.cross(v1, v2)
     # Construct the rotation matrix
     rotation_matrix = np.column_stack((v1, v2, v3))
-    print("rotation & translation mat")
     print(rotation_matrix, center)
     return rotation_matrix, center
